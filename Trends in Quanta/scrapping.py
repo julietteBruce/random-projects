@@ -6,22 +6,32 @@ def get_webpage(url):
 	req = requests.get(url)
 	return BeautifulSoup(req.content, 'html.parser')
 
-def get_href_links(url):
+def unique_elements(input_list):
+	return list(set(input_list)) 
+
+def get_href_links(webpage_soup):
 	""" Returns list with all href links on page from URL."""
-	soup = get_webpage(url)
-	all_links = soup.find_all("a")
+	all_links = webpage_soup.find_all("a")
 	return [link.get('href') for link in all_links]
 
-# print(get_href_links('https://www.quantamagazine.org/archive/'))
+# webpage_soup = get_webpage('https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/')
+# print(get_href_links(webpage_soup))
 
-def elmements_with_substring(list,string):
+def get_href_links_url(url):
+	""" Returns list with all href links on page from URL."""
+	webpage_soup = get_webpage(url)
+	return get_href_links(webpage_soup)
+
+# print(get_href_links_url('https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/'))
+
+def elmements_with_substring(input_list,desired_substring):
 	"""Returns a list of elements from a list with a given substring."""
-	return [elm for elm in list if string in elm]
+	return [elm for elm in input_list if desired_substring in elm]
 
 
-def has_substring_from_list(string,list_of_substrings):
-	for substring in list_of_substrings:
-		if substring in string:
+def has_substring_from_list(input_string,list_of_substrings):
+	for desired_substring in list_of_substrings:
+		if desired_substring in input_string:
 			return True
 	return False
 
@@ -38,7 +48,7 @@ def get_quanta_links_from_archive_page(base_url,page_number):
 							'/computer-science/', '/topics', '/archive/', '/topics','/about/', '/archive', '/contact-us/', 
 							'/terms-conditions/', '#newsletter', '/privacy-policy/', '/qa/', '/#comments']
 	wanted_links = elements_without_substrings(list_of_links,unwanted_substrings)
-	return list(set(wanted_links))
+	return unique_elements(wanted_links)
 
 # test = get_quanta_links_from_archive_page('https://www.quantamagazine.org/archive/',1)
 # print(test)
@@ -48,37 +58,60 @@ def get_quanta_links_from_archive(base_url,last_page_number):
 	links_to_return = []
 	for page_number in range(1,last_page_number+1):
 		links_to_return += get_quanta_links_from_archive_page(base_url,page_number)
-	return list(set(links_to_return))
+	return unique_elements(links_to_return)
 
 # test = get_quanta_links_from_archive('https://www.quantamagazine.org/archive/',182)
 # print(test)
 # print(len(test))
 
-def get_certain_links(url,string):
+def get_certain_links(webpage_soup,desired_substring):
 	"""Returns a list of href links on the page from URL with given substring."""
-	href_links = get_href_links(url)
-	return elmements_with_substring(href_links,string)
+	href_links = get_href_links(webpage_soup)
+	return elmements_with_substring(href_links,desired_substring)
 
-# print(get_certain_links('https://www.quantamagazine.org/new-proof-shows-when-structure-must-emerge-in-graphs-20220623/','arxiv'))
+# webpage_soup = get_webpage('https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/')
+# desired_substring = 'arxiv'
+# print(get_certain_links(webpage_soup,desired_substring))
 
-def get_MSC_from_arxiv(url):
-	soup = get_webpage(url)
-	msc_tbs = soup.find_all("td", {"class": "msc-classes"})
+def get_certain_links_url(url,desired_substring):
+	"""Returns a list of href links on the page from URL with given substring."""
+	href_links = get_href_links_url(url)
+	return elmements_with_substring(href_links,desired_substring)
+
+# url = 'https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/'
+# desired_substring = 'arxiv'
+# print(get_certain_links_url(url,desired_substring))
+
+def get_MSC_from_arxiv(webpage_soup):
+	msc_tbs = webpage_soup.find_all("td", {"class": "msc-classes"})
 	return [elm.getText() for elm in msc_tbs]
 
-print(get_MSC_from_arxiv('https://arxiv.org/abs/2212.11097'))
+# webpage_soup = get_webpage('https://arxiv.org/abs/2212.11097')
+# print(get_MSC_from_arxiv(webpage_soup))
+
+def get_MSC_from_arxiv_url(url):
+	webpage_soup = get_webpage(url)
+	return get_MSC_from_arxiv(webpage_soup)
+
+# url = 'https://arxiv.org/abs/2212.11097'
+# print(get_MSC_from_arxiv_url(url))
+# print(get_MSC_from_arxiv('https://arxiv.org/abs/2212.11097'))
+
+### LEFT OFF HERE ###
 
 def split_MSC_from_arxiv(url):
-	msc_dictionary = {}
+	dictionary_MSC = {}
 	string_MSC = get_MSC_from_arxiv(url)[0]
-	split_MSC = string_MSC.split(' (primary), ')
-	msc_dictionary['primary'] = split_MSC[0]
-	if len(split_MSC) > 1:
-		msc_dictionary['secondary'] = split_MSC[1][:-12].split(', ')
-	return msc_dictionary
+	if string_MSC:
+		split_MSC = string_MSC.split(' (primary), ')
+		dictionary_MSC['primary'] = split_MSC[0]
+		if len(split_MSC) > 1:
+			dictionary_MSC['secondary'] = split_MSC[1][:-12].split(', ')
+	return dictionary_MSC
 
-print(split_MSC_from_arxiv('https://arxiv.org/abs/2212.11097'))
+# print(split_MSC_from_arxiv('https://arxiv.org/abs/2212.11097'))
 
+# print(get_MSC_from_arxiv('https://arxiv.org/abs/2303.11428'))
 def get_primarySubject_from_arxiv(url):
 	soup = get_webpage(url)
 	sub_tbs = soup.find_all("span", {"class": "primary-subject"})
@@ -96,41 +129,21 @@ def get_subjects_from_arxiv(url):
 
 # print(get_subjects_from_arxiv('https://arxiv.org/abs/2212.11097'))
 
-def get_secondarySubjects_from_arxiv(url):
+# print(get_subjects_from_arxiv('https://arxiv.org/abs/2303.11428'))
+def get_secondary_subjects_from_arxiv(url):
 	primary_subject = get_primarySubject_from_arxiv(url)
 	all_subjects = get_subjects_from_arxiv(url)
 	all_subjects.remove(primary_subject[0])
 	return all_subjects
-
+# print(get_secondary_subjects_from_arxiv('https://arxiv.org/abs/2303.11428'))
 # print(get_secondarySubjects_from_arxiv('https://arxiv.org/abs/2212.11097'))
 
-# test1 = ['Commutative Algebra (math.AC)']
-# test2 = ['Commutative Algebra (math.AC)', 'Algebraic Geometry (math.AG)']
-# print(test1[0])
-# print(test1[0] in test2)
-# test1 = [1,2,3,'apple']
-# print(test1.remove(1))
-# # def get_certain_links(url,string):
-# # 	href_links = get_href_links(url)
-# # 	for link
-# url = 'https://arxiv.org/abs/2104.14598'
-# req = requests.get(url)
-# soup = BeautifulSoup(req.content, 'html.parser')
-# #print(soup.prettify())
-# print(soup.find_all("td",{"class":"msc-classes"}))
+def get_author_quanta_article(url):
+	soup = get_webpage(url)
+	sub_tbs = soup.find_all("div", {"class": "h3t mv05"})
+	list_of_authors = unique_elements([elm.getText() for elm in sub_tbs])
+	return [author.replace('By ', '') for author in list_of_authors]
 
-# print(get_webpage('https://www.quantamagazine.org/new-proof-shows-when-structure-must-emerge-in-graphs-20220623/'))
-# test = soup.find_all("td",{"class":"msc-classes"})
-# for elm in test:
-# 	print(elm.getText())
-# # all_links = soup.find_all("a")
-# # href_links = [link.get('href') for link in all_links]
-# # print(href_links)
-# # ##print(all_links[0])
 
-# # for link in href_links:
-# # 	if 'arxiv' in link:
-# # 		print(link)
-# # #for link in all_links:
-# # #  print(link.get_text())	# this will prints all text
-# # #  print(link.get('href'))
+
+# print(get_author_quanta_article('https://www.quantamagazine.org/quantum-computing-solves-classical-problems-20121218/'))
