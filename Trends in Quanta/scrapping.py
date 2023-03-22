@@ -89,6 +89,10 @@ def get_MSC_from_arxiv(webpage_soup):
 # webpage_soup = get_webpage('https://arxiv.org/abs/2212.11097')
 # print(get_MSC_from_arxiv(webpage_soup))
 
+# Test with not MSC
+# webpage_soup = get_webpage('https://arxiv.org/abs/2303.11723')
+# print(get_MSC_from_arxiv(webpage_soup))
+
 def get_MSC_from_arxiv_url(url):
 	webpage_soup = get_webpage(url)
 	return get_MSC_from_arxiv(webpage_soup)
@@ -96,10 +100,15 @@ def get_MSC_from_arxiv_url(url):
 # url = 'https://arxiv.org/abs/2212.11097'
 # print(get_MSC_from_arxiv_url(url))
 
+# Test with not MSC
+# url = 'https://arxiv.org/abs/2303.11723'
+# print(get_MSC_from_arxiv_url(url))
+
 def split_MSC_from_arxiv(webpage_soup):
 	dictionary_MSC = {}
-	string_MSC = get_MSC_from_arxiv(webpage_soup)[0]
-	if string_MSC:
+	list_MSC = get_MSC_from_arxiv(webpage_soup)
+	if list_MSC:
+		string_MSC = list_MSC[0]
 		split_MSC = string_MSC.split(' (primary), ')
 		dictionary_MSC['primary'] = split_MSC[0]
 		if len(split_MSC) > 1:
@@ -109,11 +118,19 @@ def split_MSC_from_arxiv(webpage_soup):
 # webpage_soup = get_webpage('https://arxiv.org/abs/2212.11097')
 # print(split_MSC_from_arxiv(webpage_soup))
 
+# Test with not MSC
+# webpage_soup = get_webpage('https://arxiv.org/abs/2303.11723')
+# print(split_MSC_from_arxiv(webpage_soup))
+
 def split_MSC_from_arxiv_url(url):
 	webpage_soup = get_webpage(url)
 	return split_MSC_from_arxiv(webpage_soup)
 
 # url = 'https://arxiv.org/abs/2212.11097'
+# print(split_MSC_from_arxiv_url(url))
+
+# Test with not MSC
+# url = 'https://arxiv.org/abs/2303.11723'
 # print(split_MSC_from_arxiv_url(url))
 
 def get_primarySubject_from_arxiv(webpage_soup):
@@ -194,3 +211,105 @@ def get_pub_date_quanta_article_url(url):
 
 # url = 'https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/'
 # print(get_pub_date_quanta_article_url(url))
+
+def get_title_quanta_article(webpage_soup):
+	title_element = (webpage_soup.find_all("meta", {"property": "og:title"}))[0]
+	title_with_branding = title_element['content']
+	title = (title_with_branding.split(" | "))[0]
+	return title
+
+# webpage_soup = get_webpage('https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/')
+# print(get_title_quanta_article(webpage_soup))
+
+def get_title_quanta_article_url(url):
+	webpage_soup = get_webpage(url)
+	return get_title_quanta_article(webpage_soup)
+
+# url = 'https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/'
+# print(get_title_quanta_article_url(url))
+
+def get_author_arxiv_listing(webpage_soup):
+	author_div = webpage_soup.find_all("meta", {"name": "citation_author"})
+	list_of_authors = unique_elements([author['content'] for author in author_div])
+	return list_of_authors
+
+# webpage_soup = get_webpage('https://arxiv.org/abs/2212.11097')
+# print(get_author_arxiv_listing(webpage_soup))
+
+def get_author_arxiv_listing_url(url):
+	webpage_soup = get_webpage(url)
+	return get_author_arxiv_listing(webpage_soup)
+
+# url = 'https://arxiv.org/abs/2212.11097'
+# print(get_author_arxiv_listing_url(url))
+
+def get_title_arxiv_listing(webpage_soup):
+	title_div = (webpage_soup.find_all("meta", {"name": "citation_title"}))[0]
+	return title_div['content']
+
+webpage_soup = get_webpage('https://arxiv.org/abs/2212.11097')
+print(get_title_arxiv_listing(webpage_soup))
+
+def get_title_arxiv_listing_url(url):
+	webpage_soup = get_webpage(url)
+	return get_title_arxiv_listing(webpage_soup)
+
+url = 'https://arxiv.org/abs/2212.11097'
+print(get_title_arxiv_listing_url(url))
+
+
+def process_arxiv_listing(url):
+	webpage_soup = get_webpage(url)
+	output_dictionary = {
+	'title' : get_title_arxiv_listing(webpage_soup),
+	'authors': get_author_arxiv_listing(webpage_soup),
+	'original_submission_date': NEED,
+	'most_recent_update_date': NEED,
+	'primary_subject': get_primarySubject_from_arxiv(webpage_soup),
+	'secondary_subject': get_secondary_subjects_from_arxiv(webpage_soup),
+	'primary-MSC': split_MSC_from_arxiv(webpage_soup)[0],
+	'secondary_MSC': NEED
+	}
+	return output_dictionary
+
+def quanta_article_overview(webpage_soup):
+	output_dictionary = {
+	'quanta_author' : get_author_quanta_article(webpage_soup),
+	'quanta_pub_date': get_pub_date_quanta_article(webpage_soup),
+	'quanta_title': get_title_quanta_article(webpage_soup)
+	}
+	return output_dictionary
+
+# webpage_soup = get_webpage('https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/')
+# print(quanta_article_overview(webpage_soup))
+
+def quanta_article_overview_url(url):
+	webpage_soup = get_webpage(url)
+	return quanta_article_overview(webpage_soup)
+
+# url = 'https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/'
+# print(quanta_article_overview_url(url))
+
+def process_quanta_article(url):
+	webpage_soup = get_webpage(url)
+	quanta_article_dictionary = quanta_article_overview(webpage_soup)
+	arxiv_links = get_certain_links(webpage_soup,'arxiv')
+	output_list = []
+	for link in arxiv_links:
+		arxiv_dictionary = process_arxiv_listing(url)
+		joint_arxiv_quanta_dictionary = quanta_article_dictionary|arxiv_dictionary
+		output_list.append(joint_arxiv_quanta_dictionary)
+	return output_list
+
+
+print(get_webpage('https://arxiv.org/abs/2012.02892'))
+
+<meta content="2020/12/04" name="citation_date"/>
+<meta content="2022/12/05" name="citation_online_date"/>
+<meta content="https://arxiv.org/pdf/2012.02892" name="citation_pdf_url"/>
+<meta content="2012.02892" name="citation_arxiv_id"/>
+
+
+
+
+
