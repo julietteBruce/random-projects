@@ -95,13 +95,10 @@ def get_MSC_from_arxiv_url(url):
 
 # url = 'https://arxiv.org/abs/2212.11097'
 # print(get_MSC_from_arxiv_url(url))
-# print(get_MSC_from_arxiv('https://arxiv.org/abs/2212.11097'))
 
-### LEFT OFF HERE ###
-
-def split_MSC_from_arxiv(url):
+def split_MSC_from_arxiv(webpage_soup):
 	dictionary_MSC = {}
-	string_MSC = get_MSC_from_arxiv(url)[0]
+	string_MSC = get_MSC_from_arxiv(webpage_soup)[0]
 	if string_MSC:
 		split_MSC = string_MSC.split(' (primary), ')
 		dictionary_MSC['primary'] = split_MSC[0]
@@ -109,41 +106,91 @@ def split_MSC_from_arxiv(url):
 			dictionary_MSC['secondary'] = split_MSC[1][:-12].split(', ')
 	return dictionary_MSC
 
-# print(split_MSC_from_arxiv('https://arxiv.org/abs/2212.11097'))
+# webpage_soup = get_webpage('https://arxiv.org/abs/2212.11097')
+# print(split_MSC_from_arxiv(webpage_soup))
 
-# print(get_MSC_from_arxiv('https://arxiv.org/abs/2303.11428'))
-def get_primarySubject_from_arxiv(url):
-	soup = get_webpage(url)
-	sub_tbs = soup.find_all("span", {"class": "primary-subject"})
+def split_MSC_from_arxiv_url(url):
+	webpage_soup = get_webpage(url)
+	return split_MSC_from_arxiv(webpage_soup)
+
+# url = 'https://arxiv.org/abs/2212.11097'
+# print(split_MSC_from_arxiv_url(url))
+
+def get_primarySubject_from_arxiv(webpage_soup):
+	sub_tbs = webpage_soup.find_all("span", {"class": "primary-subject"})
 	return [elm.getText() for elm in sub_tbs]
 
-# print(get_primarySubject_from_arxiv('https://arxiv.org/abs/2212.11097'))
+# webpage_soup = get_webpage('https://arxiv.org/abs/2212.11097')
+# print(get_primarySubject_from_arxiv(webpage_soup))
 
+def get_primarySubject_from_arxiv_url(url):
+	webpage_soup = get_webpage(url)
+	return get_primarySubject_from_arxiv(webpage_soup)
 
-def get_subjects_from_arxiv(url):
-	soup = get_webpage(url)
-	sub_tbs = soup.find_all("td", {"class": "subjects"})
-	#return msc_tbs
+# url = 'https://arxiv.org/abs/2212.11097'
+# print(get_primarySubject_from_arxiv_url(url))
+
+def get_subjects_from_arxiv(webpage_soup):
+	sub_tbs = webpage_soup.find_all("td", {"class": "subjects"})
 	subs_unformated = [elm.getText() for elm in sub_tbs][0].split("; ")
 	return [elm.lstrip() for elm in subs_unformated]
 
-# print(get_subjects_from_arxiv('https://arxiv.org/abs/2212.11097'))
+# webpage_soup = get_webpage('https://arxiv.org/abs/2212.11097')
+# print(get_primarySubject_from_arxiv(webpage_soup))
 
-# print(get_subjects_from_arxiv('https://arxiv.org/abs/2303.11428'))
-def get_secondary_subjects_from_arxiv(url):
-	primary_subject = get_primarySubject_from_arxiv(url)
-	all_subjects = get_subjects_from_arxiv(url)
+def get_subjects_from_arxiv_url(url):
+	webpage_soup = get_webpage(url)
+	return get_subjects_from_arxiv(webpage_soup)
+
+# url = 'https://arxiv.org/abs/2212.11097'
+# print(get_primarySubject_from_arxiv_url(url))
+
+def get_secondary_subjects_from_arxiv(webpage_soup):
+	primary_subject = get_primarySubject_from_arxiv(webpage_soup)
+	all_subjects = get_subjects_from_arxiv(webpage_soup)
 	all_subjects.remove(primary_subject[0])
 	return all_subjects
+
+# webpage_soup = get_webpage('https://arxiv.org/abs/2212.11097')
+# print(get_secondary_subjects_from_arxiv(webpage_soup))
+
+def get_secondary_subjects_from_arxiv_url(url):
+	webpage_soup = get_webpage(url)
+	return get_secondary_subjects_from_arxiv(webpage_soup)
+
+# url = 'https://arxiv.org/abs/2212.11097'
+# print(get_secondary_subjects_from_arxiv_url(url))
+
+
 # print(get_secondary_subjects_from_arxiv('https://arxiv.org/abs/2303.11428'))
 # print(get_secondarySubjects_from_arxiv('https://arxiv.org/abs/2212.11097'))
 
-def get_author_quanta_article(url):
-	soup = get_webpage(url)
-	sub_tbs = soup.find_all("div", {"class": "h3t mv05"})
-	list_of_authors = unique_elements([elm.getText() for elm in sub_tbs])
+def get_author_quanta_article(webpage_soup):
+	author_div = webpage_soup.find_all("div", {"class": "h3t mv05"})
+	list_of_authors = unique_elements([elm.getText() for elm in author_div])
 	return [author.replace('By ', '') for author in list_of_authors]
 
+# webpage_soup = get_webpage('https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/')
+# print(get_author_quanta_article(webpage_soup))
 
+def get_author_quanta_article_url(url):
+	webpage_soup = get_webpage(url)
+	return get_author_quanta_article(webpage_soup)
 
-# print(get_author_quanta_article('https://www.quantamagazine.org/quantum-computing-solves-classical-problems-20121218/'))
+# url = 'https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/'
+# print(get_author_quanta_article_url(url))
+
+def get_pub_date_quanta_article(webpage_soup):
+	date_element = (webpage_soup.find_all("meta", {"property": "article:published_time"}))[0]
+	pub_data_time = date_element['content']
+	return pub_data_time[:10]
+
+# webpage_soup = get_webpage('https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/')
+# print(get_pub_date_quanta_article(webpage_soup))
+
+def get_pub_date_quanta_article_url(url):
+	webpage_soup = get_webpage(url)
+	return get_pub_date_quanta_article(webpage_soup)
+
+# url = 'https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/'
+# print(get_pub_date_quanta_article_url(url))
