@@ -43,12 +43,14 @@ def elements_without_substrings(list_of_links,unwanted_substrings):
 	return links_to_return
 
 def get_quanta_links_from_archive_page(base_url,page_number):
-	list_of_links = get_href_links(base_url + 'page/' + str(page_number))
+	print()
+	list_of_links = get_href_links_url(base_url + 'page/' + str(page_number))
 	unwanted_substrings = ['/tag', '/authors/', 'http', '/privacy-policy', '/physics/', '/mathematics/', '/biology/', 
 							'/computer-science/', '/topics', '/archive/', '/topics','/about/', '/archive', '/contact-us/', 
-							'/terms-conditions/', '#newsletter', '/privacy-policy/', '/qa/', '/#comments']
-	wanted_links = elements_without_substrings(list_of_links,unwanted_substrings)
-	return unique_elements(wanted_links)
+							'/terms-conditions/', '#newsletter', '/privacy-policy/', '/qa/', '/#comments', '/puzzles/']
+	wanted_links = unique_elements(elements_without_substrings(list_of_links,unwanted_substrings))
+	wanted_links.remove('/')
+	return wanted_links
 
 # test = get_quanta_links_from_archive_page('https://www.quantamagazine.org/archive/',1)
 # print(test)
@@ -105,7 +107,7 @@ def get_MSC_from_arxiv_url(url):
 # print(get_MSC_from_arxiv_url(url))
 
 def split_MSC_from_arxiv(webpage_soup):
-	dictionary_MSC = {}
+	dictionary_MSC = {'primary': [], 'secondary': []}
 	list_MSC = get_MSC_from_arxiv(webpage_soup)
 	if list_MSC:
 		string_MSC = list_MSC[0]
@@ -247,30 +249,80 @@ def get_title_arxiv_listing(webpage_soup):
 	title_div = (webpage_soup.find_all("meta", {"name": "citation_title"}))[0]
 	return title_div['content']
 
-webpage_soup = get_webpage('https://arxiv.org/abs/2212.11097')
-print(get_title_arxiv_listing(webpage_soup))
+# webpage_soup = get_webpage('https://arxiv.org/abs/2212.11097')
+# print(get_title_arxiv_listing(webpage_soup))
 
 def get_title_arxiv_listing_url(url):
 	webpage_soup = get_webpage(url)
 	return get_title_arxiv_listing(webpage_soup)
 
-url = 'https://arxiv.org/abs/2212.11097'
-print(get_title_arxiv_listing_url(url))
+# url = 'https://arxiv.org/abs/2212.11097'
+# print(get_title_arxiv_listing_url(url))
 
+def get_original_date_arxiv_listing(webpage_soup):
+	date_div = (webpage_soup.find_all("meta", {"name": "citation_date"}))[0]
+	return date_div['content']
+
+# webpage_soup = get_webpage('https://arxiv.org/abs/2212.11097')
+# print(get_original_date_arxiv_listing(webpage_soup))
+
+def get_original_date_arxiv_listing_url(url):
+	webpage_soup = get_webpage(url)
+	return get_original_date_arxiv_listing(webpage_soup)
+
+# url = 'https://arxiv.org/abs/2212.11097'
+# print(get_original_date_arxiv_listing_url(url))
+
+def get_recent_date_arxiv_listing(webpage_soup):
+	date_div = (webpage_soup.find_all("meta", {"name": "citation_online_date"}))[0]
+	return date_div['content']
+
+# webpage_soup = get_webpage('https://arxiv.org/abs/2212.11097')
+# print(get_recent_date_arxiv_listing(webpage_soup))
+
+def get_recent_date_arxiv_listing_url(url):
+	webpage_soup = get_webpage(url)
+	return get_recent_date_arxiv_listing(webpage_soup)
+
+# url = 'https://arxiv.org/abs/2212.11097'
+# print(get_recent_date_arxiv_listing_url(url))
+
+def get_id_arxiv_listing(webpage_soup):
+	id_div = (webpage_soup.find_all("meta", {"name": "citation_arxiv_id"}))[0]
+	return id_div['content']
+
+# webpage_soup = get_webpage('https://arxiv.org/abs/2212.11097')
+# webpage_soup = get_webpage('https://arxiv.org/abs/1201.6644')
+# print(get_id_arxiv_listing(webpage_soup))
+
+def get_id_arxiv_listing_url(url):
+	webpage_soup = get_webpage(url)
+	return get_id_arxiv_listing(webpage_soup)
+
+# url = 'https://arxiv.org/abs/2212.11097'
+# print(get_id_arxiv_listing_url(url))
 
 def process_arxiv_listing(url):
 	webpage_soup = get_webpage(url)
 	output_dictionary = {
+	'arxiv_id': get_id_arxiv_listing(webpage_soup),
 	'title' : get_title_arxiv_listing(webpage_soup),
 	'authors': get_author_arxiv_listing(webpage_soup),
-	'original_submission_date': NEED,
-	'most_recent_update_date': NEED,
+	'original_submission_date': get_original_date_arxiv_listing(webpage_soup),
+	'most_recent_update_date': get_recent_date_arxiv_listing(webpage_soup),
 	'primary_subject': get_primarySubject_from_arxiv(webpage_soup),
 	'secondary_subject': get_secondary_subjects_from_arxiv(webpage_soup),
-	'primary-MSC': split_MSC_from_arxiv(webpage_soup)[0],
-	'secondary_MSC': NEED
+	'primary-MSC': split_MSC_from_arxiv(webpage_soup)['primary'],
+	'secondary_MSC': split_MSC_from_arxiv(webpage_soup)['secondary']
 	}
 	return output_dictionary
+
+# url = 'https://arxiv.org/abs/2212.11097'
+# print(process_arxiv_listing(url))
+
+# Test with not MSC
+# url = 'https://arxiv.org/abs/2303.11723'
+# print(process_arxiv_listing(url))
 
 def quanta_article_overview(webpage_soup):
 	output_dictionary = {
@@ -296,20 +348,33 @@ def process_quanta_article(url):
 	arxiv_links = get_certain_links(webpage_soup,'arxiv')
 	output_list = []
 	for link in arxiv_links:
-		arxiv_dictionary = process_arxiv_listing(url)
+		arxiv_dictionary = process_arxiv_listing(link)
 		joint_arxiv_quanta_dictionary = quanta_article_dictionary|arxiv_dictionary
 		output_list.append(joint_arxiv_quanta_dictionary)
 	return output_list
 
+url = 'https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/'
+# print(process_quanta_article(url))
 
-print(get_webpage('https://arxiv.org/abs/2012.02892'))
+def process_quanta_archive(base_url,page_number):
+	list_of_quanta_links = get_quanta_links_from_archive(base_url,page_number)
+	output_list = []
+	print(list_of_quanta_links)
+	for qaunta_link in list_of_quanta_links:
+		print(qaunta_link)
+		article_url = "https://www.quantamagazine.org" + qaunta_link
+		output_list.append(process_quanta_article(article_url))
+	return output_list
 
-<meta content="2020/12/04" name="citation_date"/>
-<meta content="2022/12/05" name="citation_online_date"/>
-<meta content="https://arxiv.org/pdf/2012.02892" name="citation_pdf_url"/>
-<meta content="2012.02892" name="citation_arxiv_id"/>
 
+base_url = 'https://www.quantamagazine.org/archive/'
+page_number = 2
+test = process_quanta_archive(base_url,page_number)
+print(test)
+print(len(test))
 
+# print(get_webpage('https://arxiv.org/abs/2012.02892'))
+# print(get_webpage('https://arxiv.org/abs/2109.09040'))
 
 
 
