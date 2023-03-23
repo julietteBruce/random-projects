@@ -86,6 +86,15 @@ def get_certain_links_url(url,desired_substring):
 # desired_substring = 'arxiv'
 # print(get_certain_links_url(url,desired_substring))
 
+def get_arxiv_links(webpage_soup):
+	links_containing_arxiv_substring = get_certain_links(webpage_soup,'arxiv')
+	unwanted_arxiv_type_sites = ['eartharxiv']
+	return elements_without_substrings(links_containing_arxiv_substring, unwanted_arxiv_type_sites)
+
+def get_arxiv_links_url(url):
+	webpage_soup = get_webpage(url)
+	return get_arxiv_links(webpage_soup)
+
 def get_MSC_from_arxiv(webpage_soup):
 	msc_tbs = webpage_soup.find_all("td", {"class": "msc-classes"})
 	return [elm.getText() for elm in msc_tbs]
@@ -347,9 +356,10 @@ def quanta_article_overview_url(url):
 def process_quanta_article(url):
 	webpage_soup = get_webpage(url)
 	quanta_article_dictionary = quanta_article_overview(webpage_soup)
-	arxiv_links = get_certain_links(webpage_soup,'arxiv')
+	arxiv_links = get_arxiv_links(webpage_soup)
 	output_list = []
 	for link in arxiv_links:
+		print(f"{link}\n")
 		arxiv_dictionary = process_arxiv_listing(link)
 		joint_arxiv_quanta_dictionary = quanta_article_dictionary|arxiv_dictionary
 		output_list.append(joint_arxiv_quanta_dictionary)
@@ -397,12 +407,15 @@ def flatten_list(list_of_lists):
 # test = [[], [1], [], [2,3]]
 # print(flatten_list(test))
 
-base_url = 'https://www.quantamagazine.org/archive/'
-page_number = 25
-test = get_quanta_links_from_archive_page(base_url,25)
-print(test)
-test2 = process_quanta_archive_page(base_url,25)
-
+# base_url = 'https://www.quantamagazine.org/archive/'
+# page_number = 25
+# test = get_quanta_links_from_archive_page(base_url,25)
+# print(test)
+# test2 = process_quanta_archive_page(base_url,25)
+url = 'https://www.quantamagazine.org/scientists-unravel-how-the-tonga-volcano-caused-worldwide-tsunamis-20220413/'
+test3 = process_quanta_article(url)
+# webpage_soup = get_webpage(url)
+# print(webpage_soup)
 # test = process_quanta_archive(base_url,page_number)
 # print(count_nonempty_lists(test))
 # print(len(test))
