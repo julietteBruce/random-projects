@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 import re 
+import pandas as pd
 
 def get_webpage(url):
 	req = requests.get(url)
@@ -59,6 +60,7 @@ def get_quanta_links_from_archive_page(base_url,page_number):
 def get_quanta_links_from_archive(base_url,last_page_number):
 	links_to_return = []
 	for page_number in range(1,last_page_number+1):
+		print(page_number)
 		links_to_return += get_quanta_links_from_archive_page(base_url,page_number)
 	return unique_elements(links_to_return)
 
@@ -359,22 +361,60 @@ url = 'https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-myster
 def process_quanta_archive(base_url,page_number):
 	list_of_quanta_links = get_quanta_links_from_archive(base_url,page_number)
 	output_list = []
-	print(list_of_quanta_links)
 	for qaunta_link in list_of_quanta_links:
-		print(qaunta_link)
 		article_url = "https://www.quantamagazine.org" + qaunta_link
 		output_list.append(process_quanta_article(article_url))
 	return output_list
 
+def process_quanta_archive_page(base_url,page_number):
+	list_of_quanta_links = get_quanta_links_from_archive_page(base_url,page_number)
+	output_list = []
+	for qaunta_link in list_of_quanta_links:
+		print(f"{qaunta_link}\n")
+		article_url = "https://www.quantamagazine.org" + qaunta_link
+		output_list.append(process_quanta_article(article_url))
+	return output_list
+
+# base_url = 'https://www.quantamagazine.org/archive/'
+# page_number = 2
+# test = process_quanta_archive(base_url,page_number)
+# print(test)
+# print(len(test))
+
+def count_nonempty_lists(list_of_lists):
+	running_cout_of_nonempty_lists = 0
+	for list1 in list_of_lists:
+		if list1:
+			running_cout_of_nonempty_lists += 1
+	return running_cout_of_nonempty_lists
+
+# test = [[], [1,2], [], [2,3]]
+# print(count_nonempty_lists(test))
+
+def flatten_list(list_of_lists):
+	return [elm for list1 in list_of_lists for elm in list1]
+
+# test = [[], [1], [], [2,3]]
+# print(flatten_list(test))
 
 base_url = 'https://www.quantamagazine.org/archive/'
-page_number = 2
-test = process_quanta_archive(base_url,page_number)
+page_number = 25
+test = get_quanta_links_from_archive_page(base_url,25)
 print(test)
-print(len(test))
+test2 = process_quanta_archive_page(base_url,25)
 
-# print(get_webpage('https://arxiv.org/abs/2012.02892'))
-# print(get_webpage('https://arxiv.org/abs/2109.09040'))
+# test = process_quanta_archive(base_url,page_number)
+# print(count_nonempty_lists(test))
+# print(len(test))
+
+# pd.set_option('display.max_columns', None)
+# pd.set_option('display.max_rows', None)
+
+# testDF = pd.DataFrame(data=flatten_list(test))
+# print(testDF)
+
+# testDF.to_csv("test-25pages.csv",index=False)
+
 
 
 
