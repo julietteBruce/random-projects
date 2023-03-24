@@ -25,10 +25,23 @@ def get_href_links_url(url):
 
 # print(get_href_links_url('https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/'))
 
+def remove_none_values_from_list(input_list):
+	return [elm for elm in input_list if elm is not None]
+
+# input_list = ['test', 'arxivtest', None, '2212testdog']
+# print(remove_none_values_from_list(input_list))
+
 def elmements_with_substring(input_list,desired_substring):
 	"""Returns a list of elements from a list with a given substring."""
-	return [elm for elm in input_list if desired_substring in elm]
+	return [elm for elm in input_list if elm is not None and desired_substring in elm]
 
+# input_list = ['test', 'arxivtest', '2212testdog']
+# desired_substring = 'arxiv'
+# print(elmements_with_substring(input_list,desired_substring))
+
+# input_list = ['test', 'arxivtest', None, '2212testdog']
+# desired_substring = 'arxiv'
+# print(elmements_with_substring(input_list,desired_substring))
 
 def has_substring_from_list(input_string,list_of_substrings):
 	for desired_substring in list_of_substrings:
@@ -423,14 +436,17 @@ def flatten_list(list_of_lists):
 
 # base_url = 'https://www.quantamagazine.org/archive/'
 # page_number = 25
-# test = get_quanta_links_from_archive_page(base_url,page_number)
-# print(test)
+# # test = get_quanta_links_from_archive_page(base_url,page_number)
+# # print(test)
 # test2 = process_quanta_archive_page(base_url,page_number)
 # print(test2)
 
-base_url = 'https://www.quantamagazine.org/archive/'
-page_number = 25
+# base_url = 'https://www.quantamagazine.org/cryptographys-future-will-be-quantum-safe-heres-how-it-will-work-20221109/'
+# test = get_certain_links_url(base_url,'arxiv')
+# print(test)
 
+page_number = 50
+base_url = 'https://www.quantamagazine.org/archive/'
 test = process_quanta_archive(base_url,page_number)
 print(count_nonempty_lists(test))
 print(len(test))
@@ -441,7 +457,7 @@ pd.set_option('display.max_rows', None)
 testDF = pd.DataFrame(data=flatten_list(test))
 print(testDF)
 
-testDF.to_csv("test-25pages.csv",index=False)
+testDF.to_csv("test-50pages.csv",index=False)
 
 
 
