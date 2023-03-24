@@ -99,10 +99,24 @@ def get_certain_links_url(url,desired_substring):
 # desired_substring = 'arxiv'
 # print(get_certain_links_url(url,desired_substring))
 
+def convert_arxiv_pdf_to_abs(url):
+	if url[-3:] == 'pdf':
+		arxiv_id = url[:-4].split('/')[-1]
+		base_arxiv_url = 'https://arxiv.org/abs/'
+		return base_arxiv_url + arxiv_id
+	return url
+
+# url = 'https://arxiv.org/pdf/2101.08898.pdf'
+# print(convert_arxiv_pdf_to_abs(url))
+
+# url = 'https://arxiv.org/abs/0802.3361'
+# print(convert_arxiv_pdf_to_abs(url))
+
 def get_arxiv_links(webpage_soup):
 	links_containing_arxiv_substring = get_certain_links(webpage_soup,'arxiv')
 	unwanted_arxiv_type_sites = ['eartharxiv']
-	return elements_without_substrings(links_containing_arxiv_substring, unwanted_arxiv_type_sites)
+	wanted_arxiv_links = elements_without_substrings(links_containing_arxiv_substring, unwanted_arxiv_type_sites)
+	return [convert_arxiv_pdf_to_abs(url) for url in wanted_arxiv_links]
 
 # # This article contains two arxiv links. 
 # webpage_soup = get_webpage('https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/')
@@ -110,6 +124,10 @@ def get_arxiv_links(webpage_soup):
 
 # # This article contains an eartharxiv paper, but no arxive papers. 
 # webpage_soup = get_webpage('https://www.quantamagazine.org/scientists-unravel-how-the-tonga-volcano-caused-worldwide-tsunamis-20220413/')
+# print(get_arxiv_links(webpage_soup))
+
+# # This article contains two arxiv links, and one is to a pdf. 
+# webpage_soup = get_webpage('https://www.quantamagazine.org/mathematicians-find-a-new-class-of-digitally-delicate-primes-20210330/')
 # print(get_arxiv_links(webpage_soup))
 
 def get_arxiv_links_url(url):
@@ -408,6 +426,7 @@ def process_quanta_archive_page(base_url,page_number):
 	list_of_quanta_links = get_quanta_links_from_archive_page(base_url,page_number)
 	output_list = []
 	for qaunta_link in list_of_quanta_links:
+		print(f"{qaunta_link}\n")
 		article_url = "https://www.quantamagazine.org" + qaunta_link
 		output_list.append(process_quanta_article(article_url))
 	return output_list
@@ -434,30 +453,30 @@ def flatten_list(list_of_lists):
 # test = [[], [1], [], [2,3]]
 # print(flatten_list(test))
 
-# base_url = 'https://www.quantamagazine.org/archive/'
-# page_number = 25
+base_url = 'https://www.quantamagazine.org/archive/'
+page_number = 49
 # # test = get_quanta_links_from_archive_page(base_url,page_number)
 # # print(test)
-# test2 = process_quanta_archive_page(base_url,page_number)
-# print(test2)
+test2 = process_quanta_archive_page(base_url,page_number)
+print(test2)
 
-# base_url = 'https://www.quantamagazine.org/cryptographys-future-will-be-quantum-safe-heres-how-it-will-work-20221109/'
+# base_url = 'https://www.quantamagazine.org/mathematicians-find-a-new-class-of-digitally-delicate-primes-20210330/'
 # test = get_certain_links_url(base_url,'arxiv')
 # print(test)
 
-page_number = 50
-base_url = 'https://www.quantamagazine.org/archive/'
-test = process_quanta_archive(base_url,page_number)
-print(count_nonempty_lists(test))
-print(len(test))
+# page_number = 50
+# base_url = 'https://www.quantamagazine.org/archive/'
+# test = process_quanta_archive(base_url,page_number)
+# print(count_nonempty_lists(test))
+# print(len(test))
 
-pd.set_option('display.max_columns', None)
-pd.set_option('display.max_rows', None)
+# pd.set_option('display.max_columns', None)
+# pd.set_option('display.max_rows', None)
 
-testDF = pd.DataFrame(data=flatten_list(test))
-print(testDF)
+# testDF = pd.DataFrame(data=flatten_list(test))
+# print(testDF)
 
-testDF.to_csv("test-50pages.csv",index=False)
+# testDF.to_csv("test-50pages.csv",index=False)
 
 
 
