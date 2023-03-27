@@ -102,10 +102,16 @@ def get_certain_links_url(url,desired_substring):
 
 def convert_arxiv_pdf_to_abs(url):
 	if url[-3:] == 'pdf':
-		arxiv_id = url[:-4].split('/')[-1]
-		base_arxiv_url = 'https://arxiv.org/abs/'
-		return base_arxiv_url + arxiv_id
+		arxiv_link_unedited = url[:-4]
+		broken_link = arxiv_link_unedited.split('pdf')
+		return broken_link[0] + 'abs' + broken_link[1]
+		# arxiv_id = url[:-4].split('/')[-1]
+		# base_arxiv_url = 'https://arxiv.org/abs/'
+		# return base_arxiv_url + arxiv_id
 	return url
+
+# url = 'https://arxiv.org/pdf/hep-ph/0505013.pdf'
+# print(convert_arxiv_pdf_to_abs(url))
 
 # url = 'https://arxiv.org/pdf/2101.08898.pdf'
 # print(convert_arxiv_pdf_to_abs(url))
@@ -463,9 +469,14 @@ def flatten_list(list_of_lists):
 # test2 = process_quanta_archive_page(base_url,page_number)
 # print(test2)
 
-# base_url = 'https://www.quantamagazine.org/mathematicians-find-a-new-class-of-digitally-delicate-primes-20210330/'
+# base_url = 'https://www.quantamagazine.org/neutrino-puzzles-point-to-the-possibility-of-multiple-missing-particles-20211028/'
+# base_url = 'https://arxiv.org/abs/hep-ph/0505013'
+# print(get_webpage(base_url))
 # test = get_certain_links_url(base_url,'arxiv')
 # print(test)
+
+# base_url = 'https://arxiv.org/abs/hep-ph/0505013'
+# print(process_arxiv_listing(base_url))
 
 page_number = 75
 base_url = 'https://www.quantamagazine.org/archive/'
@@ -481,13 +492,28 @@ pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 
 testDF = pd.DataFrame(data=flatten_list(test))
-print(testDF)
+# print(testDF)
 
 testDF.to_csv("test-75pages.csv",index=False)
 
 
+# /neutrino-puzzles-point-to-the-possibility-of-multiple-missing-particles-20211028/
+
+# https://arxiv.org/abs/0910.1657
+
+# https://arxiv.org/abs/1310.6337
+
+# https://arxiv.org/abs/2106.05913
+
+# https://arxiv.org/abs/2107.10291
+
+# https://arxiv.org/abs/0505013
 
 
 # 25 pages of quanta archvie
 # 93 articles with arixv link
 # 225 total articles
+
+# 75 pages of quanta arxhive
+# 260 articles with arixv link
+# 675 total articles
