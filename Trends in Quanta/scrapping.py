@@ -488,6 +488,6 @@ testDF.to_csv("test-75pages.csv",index=False)
 
 
 
-# 25 
-# 93
-# 225
+# 25 pages of quanta archvie
+# 93 articles with arixv link
+# 225 total articles
