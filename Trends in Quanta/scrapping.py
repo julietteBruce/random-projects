@@ -45,7 +45,7 @@ def elmements_with_substring(input_list,desired_substring):
 
 def has_substring_from_list(input_string,list_of_substrings):
 	for desired_substring in list_of_substrings:
-		if desired_substring in input_string:
+		if input_string is not None and desired_substring in input_string:
 			return True
 	return False
 
@@ -61,7 +61,8 @@ def get_quanta_links_from_archive_page(base_url,page_number):
 	list_of_links = get_href_links_url(base_url + 'page/' + str(page_number))
 	unwanted_substrings = ['/tag', '/authors/', 'http', '/privacy-policy', '/physics/', '/mathematics/', '/biology/', 
 							'/computer-science/', '/topics', '/archive/', '/topics','/about/', '/archive', '/contact-us/', 
-							'/terms-conditions/', '#newsletter', '/privacy-policy/', '/qa/', '/#comments', '/puzzles/']
+							'/terms-conditions/', '#newsletter', '/privacy-policy/', '/qa/', '/#comments', '/puzzles/', 
+							'/multimedia/', '/abstractions/']
 	wanted_links = unique_elements(elements_without_substrings(list_of_links,unwanted_substrings))
 	wanted_links.remove('/')
 	return wanted_links
@@ -114,7 +115,7 @@ def convert_arxiv_pdf_to_abs(url):
 
 def get_arxiv_links(webpage_soup):
 	links_containing_arxiv_substring = get_certain_links(webpage_soup,'arxiv')
-	unwanted_arxiv_type_sites = ['eartharxiv']
+	unwanted_arxiv_type_sites = ['eartharxiv','search']
 	wanted_arxiv_links = elements_without_substrings(links_containing_arxiv_substring, unwanted_arxiv_type_sites)
 	return [convert_arxiv_pdf_to_abs(url) for url in wanted_arxiv_links]
 
@@ -406,6 +407,7 @@ def process_quanta_article(url):
 	arxiv_links = get_arxiv_links(webpage_soup)
 	output_list = []
 	for link in arxiv_links:
+		print(f"{link}\n")
 		arxiv_dictionary = process_arxiv_listing(link)
 		joint_arxiv_quanta_dictionary = quanta_article_dictionary|arxiv_dictionary
 		output_list.append(joint_arxiv_quanta_dictionary)
@@ -418,6 +420,7 @@ def process_quanta_archive(base_url,page_number):
 	list_of_quanta_links = get_quanta_links_from_archive(base_url,page_number)
 	output_list = []
 	for qaunta_link in list_of_quanta_links:
+		print(f"{qaunta_link}\n")
 		article_url = "https://www.quantamagazine.org" + qaunta_link
 		output_list.append(process_quanta_article(article_url))
 	return output_list
@@ -453,31 +456,38 @@ def flatten_list(list_of_lists):
 # test = [[], [1], [], [2,3]]
 # print(flatten_list(test))
 
-base_url = 'https://www.quantamagazine.org/archive/'
-page_number = 49
+# base_url = 'https://www.quantamagazine.org/archive/'
+# page_number = 49
 # # test = get_quanta_links_from_archive_page(base_url,page_number)
 # # print(test)
-test2 = process_quanta_archive_page(base_url,page_number)
-print(test2)
+# test2 = process_quanta_archive_page(base_url,page_number)
+# print(test2)
 
 # base_url = 'https://www.quantamagazine.org/mathematicians-find-a-new-class-of-digitally-delicate-primes-20210330/'
 # test = get_certain_links_url(base_url,'arxiv')
 # print(test)
 
-# page_number = 50
-# base_url = 'https://www.quantamagazine.org/archive/'
-# test = process_quanta_archive(base_url,page_number)
-# print(count_nonempty_lists(test))
-# print(len(test))
+page_number = 75
+base_url = 'https://www.quantamagazine.org/archive/'
+# list_of_quanta_links = get_quanta_links_from_archive(base_url,page_number)
 
-# pd.set_option('display.max_columns', None)
-# pd.set_option('display.max_rows', None)
+# test = [link for link in list_of_quanta_links if not link[-2].isdigit()]
+# print(test)
+test = process_quanta_archive(base_url,page_number)
+print(count_nonempty_lists(test))
+print(len(test))
 
-# testDF = pd.DataFrame(data=flatten_list(test))
-# print(testDF)
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
 
-# testDF.to_csv("test-50pages.csv",index=False)
+testDF = pd.DataFrame(data=flatten_list(test))
+print(testDF)
+
+testDF.to_csv("test-75pages.csv",index=False)
 
 
 
 
+# 25 
+# 93
+# 225
