@@ -411,40 +411,49 @@ def process_quanta_article(url):
 	webpage_soup = get_webpage(url)
 	quanta_article_dictionary = quanta_article_overview(webpage_soup)
 	arxiv_links = get_arxiv_links(webpage_soup)
-	output_list = []
+	output_arxiv_list = []
 	for link in arxiv_links:
 		print(f"{link}\n")
 		arxiv_dictionary = process_arxiv_listing(link)
 		joint_arxiv_quanta_dictionary = quanta_article_dictionary|arxiv_dictionary
-		output_list.append(joint_arxiv_quanta_dictionary)
-	return output_list
+		output_arxiv_list.append(joint_arxiv_quanta_dictionary)
+	quanta_article_dictionary.update({'number_arxiv_links': len(arxiv_links)}) 
+	return {'output_arxiv_list': output_arxiv_list, 'quanta_article_dictionary': quanta_article_dictionary}
 
-url = 'https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/'
+# url = 'https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/'
 # print(process_quanta_article(url))
+
 
 def process_quanta_archive(base_url,page_number):
 	list_of_quanta_links = get_quanta_links_from_archive(base_url,page_number)
-	output_list = []
+	output_arxiv_list = []
+	output_quanta_list = []
 	for qaunta_link in list_of_quanta_links:
-		print(f"{qaunta_link}\n")
+		# print(f"{qaunta_link}\n")
 		article_url = "https://www.quantamagazine.org" + qaunta_link
-		output_list.append(process_quanta_article(article_url))
-	return output_list
+		articlie_dictionay = process_quanta_article(article_url)
+		output_arxiv_list.append(articlie_dictionay['output_arxiv_list'])
+		output_quanta_list.append(articlie_dictionay['quanta_article_dictionary'])
+	return {'output_arxiv_list': output_arxiv_list, 'output_quanta_list': output_quanta_list}
 
 def process_quanta_archive_page(base_url,page_number):
 	list_of_quanta_links = get_quanta_links_from_archive_page(base_url,page_number)
-	output_list = []
+	output_arxiv_list = []
+	output_quanta_list = []
 	for qaunta_link in list_of_quanta_links:
-		print(f"{qaunta_link}\n")
+		# print(f"{qaunta_link}\n")
 		article_url = "https://www.quantamagazine.org" + qaunta_link
-		output_list.append(process_quanta_article(article_url))
-	return output_list
+		articlie_dictionay = process_quanta_article(article_url)
+		output_arxiv_list.append(articlie_dictionay['output_arxiv_list'])
+		output_quanta_list.append(articlie_dictionay['quanta_article_dictionary'])
+	return {'output_arxiv_list': output_arxiv_list, 'output_quanta_list': output_quanta_list}
+
 
 # base_url = 'https://www.quantamagazine.org/archive/'
 # page_number = 2
 # test = process_quanta_archive(base_url,page_number)
-# print(test)
-# print(len(test))
+# print(test['output_arxiv_list'])
+# print(test['output_quanta_list'])
 
 def count_nonempty_lists(list_of_lists):
 	running_cout_of_nonempty_lists = 0
@@ -475,39 +484,22 @@ def flatten_list(list_of_lists):
 # test = get_certain_links_url(base_url,'arxiv')
 # print(test)
 
-# base_url = 'https://arxiv.org/abs/hep-ph/0505013'
-# print(process_arxiv_listing(base_url))
 
-page_number = 75
+
+page_number = 10
 base_url = 'https://www.quantamagazine.org/archive/'
-# list_of_quanta_links = get_quanta_links_from_archive(base_url,page_number)
-
-# test = [link for link in list_of_quanta_links if not link[-2].isdigit()]
-# print(test)
 test = process_quanta_archive(base_url,page_number)
-print(count_nonempty_lists(test))
-print(len(test))
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 
-testDF = pd.DataFrame(data=flatten_list(test))
-# print(testDF)
+arxivDF = pd.DataFrame(data=flatten_list(test['output_arxiv_list']))
+quantaDF = pd.DataFrame(data=test['output_quanta_list'])
+print(arxivDF)
+print(quantaDF)
+arxivDF.to_csv("arxiv-10pages.csv",index=False)
+quantaDF.to_csv("quanta-10pages.csv",index=False)
 
-testDF.to_csv("test-75pages.csv",index=False)
-
-
-# /neutrino-puzzles-point-to-the-possibility-of-multiple-missing-particles-20211028/
-
-# https://arxiv.org/abs/0910.1657
-
-# https://arxiv.org/abs/1310.6337
-
-# https://arxiv.org/abs/2106.05913
-
-# https://arxiv.org/abs/2107.10291
-
-# https://arxiv.org/abs/0505013
 
 
 # 25 pages of quanta archvie
