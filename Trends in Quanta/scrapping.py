@@ -74,7 +74,6 @@ def get_quanta_links_from_archive_page(base_url: str, page_number: int) -> List[
 def get_quanta_links_from_archive(base_url: str, last_page_number: int) -> List[str]:
 	links_to_return = []
 	for page_number in range(1,last_page_number+1):
-		print(page_number)
 		links_to_return += get_quanta_links_from_archive_page(base_url,page_number)
 	return unique_elements(links_to_return)
 
@@ -121,7 +120,7 @@ def convert_arxiv_pdf_to_abs(url: str) -> str:
 
 def get_arxiv_links(webpage_soup) -> List[str]:
 	links_containing_arxiv_substring = get_certain_links(webpage_soup,'arxiv')
-	unwanted_arxiv_type_sites = ['eartharxiv','search']
+	unwanted_arxiv_type_sites = ['eartharxiv','search', 'psyarxiv']
 	wanted_arxiv_links = elements_without_substrings(links_containing_arxiv_substring, unwanted_arxiv_type_sites)
 	return [convert_arxiv_pdf_to_abs(url) for url in wanted_arxiv_links]
 
@@ -382,8 +381,8 @@ def process_arxiv_listing(url: str) -> Dict[str, Dict]:
 	}
 	return output_dictionary
 
-url = 'https://arxiv.org/abs/2212.11097'
-print(process_arxiv_listing(url))
+# url = 'https://arxiv.org/abs/2212.11097'
+# print(process_arxiv_listing(url))
 
 # Test with not MSC
 # url = 'https://arxiv.org/abs/2303.11723'
@@ -429,7 +428,7 @@ def process_quanta_archive(base_url: str, page_number: int) -> Dict[str, List]:
 	output_arxiv_list = []
 	output_quanta_list = []
 	for qaunta_link in list_of_quanta_links:
-		# print(f"{qaunta_link}\n")
+		print(f"{qaunta_link}\n")
 		article_url = "https://www.quantamagazine.org" + qaunta_link
 		articlie_dictionay = process_quanta_article(article_url)
 		output_arxiv_list.append(articlie_dictionay['output_arxiv_list'])
@@ -441,7 +440,7 @@ def process_quanta_archive_page(base_url: str, page_number: int) -> Dict[str, Di
 	output_arxiv_list = []
 	output_quanta_list = []
 	for qaunta_link in list_of_quanta_links:
-		# print(f"{qaunta_link}\n")
+		print(f"{qaunta_link}\n")
 		article_url = "https://www.quantamagazine.org" + qaunta_link
 		articlie_dictionay = process_quanta_article(article_url)
 		output_arxiv_list.append(articlie_dictionay['output_arxiv_list'])
@@ -474,25 +473,27 @@ def flatten_list(list_of_lists: List[List]) -> List:
 
 def process_quanta_archive_datafram(base_url: str, page_number: int) -> None:
 	procesed_dictionary = process_quanta_archive(base_url,page_number)
-	arxivDF = pd.DataFrame(data=flatten_list(test['output_arxiv_list']))
-	quantaDF = pd.DataFrame(data=test['output_quanta_list'])
-	arix_output_filename = 'arxiv-' + str
-	arxivDF.to_csv("arxiv-10pages.csv",index=False)
-	quantaDF.to_csv("quanta-10pages.csv",index=False)
+	arxivDF = pd.DataFrame(data=flatten_list(procesed_dictionary['output_arxiv_list']))
+	quantaDF = pd.DataFrame(data=procesed_dictionary['output_quanta_list'])
+	arix_output_filename = 'arxiv-' + str(page_number) + '-pages.csv'
+	quanta_output_filename = 'quanta-' + str(page_number) + '-pages.csv'
+	arxivDF.to_csv(arix_output_filename,index=False)
+	quantaDF.to_csv(quanta_output_filename,index=False)
 
-	page_number = 10
+page_number = 100
 base_url = 'https://www.quantamagazine.org/archive/'
-test = process_quanta_archive(base_url,page_number)
+test = process_quanta_archive_datafram(base_url,page_number)
 
-pd.set_option('display.max_columns', None)
-pd.set_option('display.max_rows', None)
 
-arxivDF = pd.DataFrame(data=flatten_list(test['output_arxiv_list']))
-quantaDF = pd.DataFrame(data=test['output_quanta_list'])
-print(arxivDF)
-print(quantaDF)
-arxivDF.to_csv("arxiv-10pages.csv",index=False)
-quantaDF.to_csv("quanta-10pages.csv",index=False)
+# pd.set_option('display.max_columns', None)
+# pd.set_option('display.max_rows', None)
+
+# arxivDF = pd.DataFrame(data=flatten_list(test['output_arxiv_list']))
+# quantaDF = pd.DataFrame(data=test['output_quanta_list'])
+# print(arxivDF)
+# print(quantaDF)
+# arxivDF.to_csv("arxiv-10pages.csv",index=False)
+# quantaDF.to_csv("quanta-10pages.csv",index=False)
 # base_url = 'https://www.quantamagazine.org/archive/'
 # page_number = 49
 # # test = get_quanta_links_from_archive_page(base_url,page_number)
