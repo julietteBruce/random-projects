@@ -382,8 +382,8 @@ def process_arxiv_listing(url: str) -> Dict[str, Dict]:
 	}
 	return output_dictionary
 
-# url = 'https://arxiv.org/abs/2212.11097'
-# print(process_arxiv_listing(url))
+url = 'https://arxiv.org/abs/2212.11097'
+print(process_arxiv_listing(url))
 
 # Test with not MSC
 # url = 'https://arxiv.org/abs/2303.11723'
@@ -471,6 +471,28 @@ def flatten_list(list_of_lists: List[List]) -> List:
 # test = [[], [1], [], [2,3]]
 # print(flatten_list(test))
 
+
+def process_quanta_archive_datafram(base_url: str, page_number: int) -> None:
+	procesed_dictionary = process_quanta_archive(base_url,page_number)
+	arxivDF = pd.DataFrame(data=flatten_list(test['output_arxiv_list']))
+	quantaDF = pd.DataFrame(data=test['output_quanta_list'])
+	arix_output_filename = 'arxiv-' + str
+	arxivDF.to_csv("arxiv-10pages.csv",index=False)
+	quantaDF.to_csv("quanta-10pages.csv",index=False)
+
+	page_number = 10
+base_url = 'https://www.quantamagazine.org/archive/'
+test = process_quanta_archive(base_url,page_number)
+
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
+
+arxivDF = pd.DataFrame(data=flatten_list(test['output_arxiv_list']))
+quantaDF = pd.DataFrame(data=test['output_quanta_list'])
+print(arxivDF)
+print(quantaDF)
+arxivDF.to_csv("arxiv-10pages.csv",index=False)
+quantaDF.to_csv("quanta-10pages.csv",index=False)
 # base_url = 'https://www.quantamagazine.org/archive/'
 # page_number = 49
 # # test = get_quanta_links_from_archive_page(base_url,page_number)
@@ -486,19 +508,19 @@ def flatten_list(list_of_lists: List[List]) -> List:
 
 
 
-page_number = 10
-base_url = 'https://www.quantamagazine.org/archive/'
-test = process_quanta_archive(base_url,page_number)
+# page_number = 10
+# base_url = 'https://www.quantamagazine.org/archive/'
+# test = process_quanta_archive(base_url,page_number)
 
-pd.set_option('display.max_columns', None)
-pd.set_option('display.max_rows', None)
+# pd.set_option('display.max_columns', None)
+# pd.set_option('display.max_rows', None)
 
-arxivDF = pd.DataFrame(data=flatten_list(test['output_arxiv_list']))
-quantaDF = pd.DataFrame(data=test['output_quanta_list'])
-print(arxivDF)
-print(quantaDF)
-arxivDF.to_csv("arxiv-10pages.csv",index=False)
-quantaDF.to_csv("quanta-10pages.csv",index=False)
+# arxivDF = pd.DataFrame(data=flatten_list(test['output_arxiv_list']))
+# quantaDF = pd.DataFrame(data=test['output_quanta_list'])
+# print(arxivDF)
+# print(quantaDF)
+# arxivDF.to_csv("arxiv-10pages.csv",index=False)
+# quantaDF.to_csv("quanta-10pages.csv",index=False)
 
 
 
