@@ -128,7 +128,7 @@ def convert_arxiv_pdf_to_abs(url: str) -> str:
 
 def get_arxiv_links(webpage_soup) -> List[str]:
 	links_containing_arxiv_substring = get_certain_links(webpage_soup,'arxiv.org')
-	unwanted_arxiv_type_sites = ['eartharxiv','search', 'psyarxiv', '.html']
+	unwanted_arxiv_type_sites = ['eartharxiv','search', 'psyarxiv', '.html', 'find']
 	wanted_arxiv_links = elements_without_substrings(links_containing_arxiv_substring, unwanted_arxiv_type_sites)
 	return [convert_arxiv_pdf_to_abs(url) for url in wanted_arxiv_links]
 
