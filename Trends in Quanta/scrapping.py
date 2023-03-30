@@ -74,6 +74,8 @@ def get_quanta_links_from_archive_page(base_url: str, page_number: int) -> List[
 def get_quanta_links_from_archive(base_url: str, last_page_number: int) -> List[str]:
 	links_to_return = []
 	for page_number in range(1,last_page_number+1):
+		if page_number % 1 == 0:
+			print(f"Quanta Page: {page_number}\n", flush=True)
 		links_to_return += get_quanta_links_from_archive_page(base_url,page_number)
 	return unique_elements(links_to_return)
 
@@ -102,12 +104,18 @@ def get_certain_links_url(url: str, desired_substring: str) -> List[str]:
 def convert_arxiv_pdf_to_abs(url: str) -> str:
 	if url[-3:] == 'pdf':
 		arxiv_link_unedited = url[:-4]
-		broken_link = arxiv_link_unedited.split('pdf')
-		return broken_link[0] + 'abs' + broken_link[1]
-		# arxiv_id = url[:-4].split('/')[-1]
-		# base_arxiv_url = 'https://arxiv.org/abs/'
-		# return base_arxiv_url + arxiv_id
+		if 'ftp' in arxiv_link_unedited:
+			arxiv_id = (arxiv_link_unedited.split('/'))[-1]
+			base_arxiv_url = 'https://arxiv.org/abs/'
+			return base_arxiv_url + arxiv_id
+		else:
+			broken_link = arxiv_link_unedited.split('pdf')
+			return broken_link[0] + 'abs' + broken_link[1]
 	return url
+
+
+# url = 'http://arxiv.org/ftp/arxiv/papers/0806/0806.1316.pdf'
+# print(convert_arxiv_pdf_to_abs(url))
 
 # url = 'https://arxiv.org/pdf/hep-ph/0505013.pdf'
 # print(convert_arxiv_pdf_to_abs(url))
@@ -119,8 +127,8 @@ def convert_arxiv_pdf_to_abs(url: str) -> str:
 # print(convert_arxiv_pdf_to_abs(url))
 
 def get_arxiv_links(webpage_soup) -> List[str]:
-	links_containing_arxiv_substring = get_certain_links(webpage_soup,'arxiv')
-	unwanted_arxiv_type_sites = ['eartharxiv','search', 'psyarxiv']
+	links_containing_arxiv_substring = get_certain_links(webpage_soup,'arxiv.org')
+	unwanted_arxiv_type_sites = ['eartharxiv','search', 'psyarxiv', '.html']
 	wanted_arxiv_links = elements_without_substrings(links_containing_arxiv_substring, unwanted_arxiv_type_sites)
 	return [convert_arxiv_pdf_to_abs(url) for url in wanted_arxiv_links]
 
@@ -419,20 +427,50 @@ def process_quanta_article(url: str) -> Dict[str, Dict]:
 	quanta_article_dictionary.update({'number_arxiv_links': len(arxiv_links)}) 
 	return {'output_arxiv_list': output_arxiv_list, 'quanta_article_dictionary': quanta_article_dictionary}
 
+# url = 'https://www.quantamagazine.org/mathematician-disproves-group-algebra-unit-conjecture-20210412/'
 # url = 'https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/'
 # print(process_quanta_article(url))
 
+def write_list_to_file(input_list: List, output_filename: str) -> None:
+	with open(output_filename, 'a') as output_file:
+		output_file.write(f"{input_list}")
+
+def store_quanta_archive_links(base_url: str, page_number: int, output_filename: str) -> None:
+	list_of_quanta_links = get_quanta_links_from_archive(base_url,page_number)
+	write_list_to_file(list_of_quanta_links, output_filename)
+
+def process_quanta_archive_from_saved_links(base_url: str, save_links: str, page_number: int) -> Dict[str, List]:
+	# list_of_quanta_links = ADD THIS 
+	output_arxiv_list = []
+	output_quanta_list = []
+	number_quanta_articles = len(list_of_quanta_links)
+	article_number = 0
+	for qaunta_link in list_of_quanta_links:
+		if article_number % 10 == 0:
+			print(f"{article_number}, {number_quanta_articles}\n", flush=True)
+		print(f"{qaunta_link}\n",flush=True)
+		article_url = "https://www.quantamagazine.org" + qaunta_link
+		articlie_dictionay = process_quanta_article(article_url)
+		output_arxiv_list.append(articlie_dictionay['output_arxiv_list'])
+		output_quanta_list.append(articlie_dictionay['quanta_article_dictionary'])
+		article_number += 1
+	return {'output_arxiv_list': output_arxiv_list, 'output_quanta_list': output_quanta_list}
 
 def process_quanta_archive(base_url: str, page_number: int) -> Dict[str, List]:
 	list_of_quanta_links = get_quanta_links_from_archive(base_url,page_number)
 	output_arxiv_list = []
 	output_quanta_list = []
+	number_quanta_articles = len(list_of_quanta_links)
+	article_number = 0
 	for qaunta_link in list_of_quanta_links:
-		print(f"{qaunta_link}\n")
+		if article_number % 10 == 0:
+			print(f"{article_number}, {number_quanta_articles}\n", flush=True)
+		print(f"{qaunta_link}\n",flush=True)
 		article_url = "https://www.quantamagazine.org" + qaunta_link
 		articlie_dictionay = process_quanta_article(article_url)
 		output_arxiv_list.append(articlie_dictionay['output_arxiv_list'])
 		output_quanta_list.append(articlie_dictionay['quanta_article_dictionary'])
+		article_number += 1
 	return {'output_arxiv_list': output_arxiv_list, 'output_quanta_list': output_quanta_list}
 
 def process_quanta_archive_page(base_url: str, page_number: int) -> Dict[str, Dict]:
@@ -475,15 +513,19 @@ def process_quanta_archive_datafram(base_url: str, page_number: int) -> None:
 	procesed_dictionary = process_quanta_archive(base_url,page_number)
 	arxivDF = pd.DataFrame(data=flatten_list(procesed_dictionary['output_arxiv_list']))
 	quantaDF = pd.DataFrame(data=procesed_dictionary['output_quanta_list'])
-	arix_output_filename = 'arxiv-' + str(page_number) + '-pages.csv'
-	quanta_output_filename = 'quanta-' + str(page_number) + '-pages.csv'
+	arix_output_filename = str(page_number) + '-pages-arxiv-.csv'
+	quanta_output_filename = str(page_number) + '-pages-quanta-.csv'
 	arxivDF.to_csv(arix_output_filename,index=False)
 	quantaDF.to_csv(quanta_output_filename,index=False)
 
-page_number = 100
+page_number = 183
 base_url = 'https://www.quantamagazine.org/archive/'
 test = process_quanta_archive_datafram(base_url,page_number)
 
+
+# url = "https://www.quantamagazine.org/the-last-of-the-universes-ordinary-matter-has-been-found-20180910/"
+# print(get_webpage(url))
+# arxiv:1709.10378v2
 
 # pd.set_option('display.max_columns', None)
 # pd.set_option('display.max_rows', None)
