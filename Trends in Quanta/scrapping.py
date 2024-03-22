@@ -126,11 +126,19 @@ def convert_arxiv_pdf_to_abs(url: str) -> str:
 # url = 'https://arxiv.org/abs/0802.3361'
 # print(convert_arxiv_pdf_to_abs(url))
 
+def remove_typos_in_arxiv_links(url: str) -> str:
+	clear_url = url.replace('?', '/')
+	return clear_url
+
+# url = 'https://arxiv.org/abs/hep-ph?0412099'
+# print(remove_typos_in_arxiv_links(url))
+
 def get_arxiv_links(webpage_soup) -> List[str]:
 	links_containing_arxiv_substring = get_certain_links(webpage_soup,'arxiv.org')
 	unwanted_arxiv_type_sites = ['eartharxiv','search', 'psyarxiv', '.html', 'find']
 	wanted_arxiv_links = elements_without_substrings(links_containing_arxiv_substring, unwanted_arxiv_type_sites)
-	return [convert_arxiv_pdf_to_abs(url) for url in wanted_arxiv_links]
+	cleaned_arxiv_links = [remove_typos_in_arxiv_links(url) for url in wanted_arxiv_links]
+	return [convert_arxiv_pdf_to_abs(url) for url in cleaned_arxiv_links]
 
 # # This article contains two arxiv links. 
 # webpage_soup = get_webpage('https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/')
@@ -277,6 +285,7 @@ def get_pub_date_quanta_article(webpage_soup) -> str:
 	return pub_data_time[:10]
 
 # webpage_soup = get_webpage('https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/')
+# webpage_soup = get_webpage('https://www.quantamagazine.org/emily-riehl-conducts-the-mathematical-orchestra-from-the-middle-20200902/')
 # print(get_pub_date_quanta_article(webpage_soup))
 
 def get_pub_date_quanta_article_url(url: str) -> str:
@@ -429,6 +438,7 @@ def process_quanta_article(url: str) -> Dict[str, Dict]:
 
 # url = 'https://www.quantamagazine.org/mathematician-disproves-group-algebra-unit-conjecture-20210412/'
 # url = 'https://www.quantamagazine.org/long-sought-math-proof-unlocks-more-mysterious-modular-forms-20230309/'
+# url = 'https://www.quantamagazine.org/how-the-neutrinos-tiny-mass-could-help-solve-big-mysteries-20191015/'
 # print(process_quanta_article(url))
 
 def write_list_to_file(input_list: List, output_filename: str) -> None:
@@ -508,6 +518,18 @@ def flatten_list(list_of_lists: List[List]) -> List:
 # test = [[], [1], [], [2,3]]
 # print(flatten_list(test))
 
+def test_quanta_pages(base_url: str, page_number: int) -> None:
+	list_of_quanta_links = get_quanta_links_from_archive(base_url,page_number)
+	i = 0 
+	for qaunta_link in list_of_quanta_links:
+		print(f"{i}, {qaunta_link}\n",flush=True)
+		article_url = "https://www.quantamagazine.org" + qaunta_link
+		get_pub_date_quanta_article_url(article_url)
+		i += 1
+
+#page_number = 203
+#base_url = 'https://www.quantamagazine.org/archive/'
+#test = test_quanta_pages(base_url,page_number)
 
 def process_quanta_archive_datafram(base_url: str, page_number: int) -> None:
 	procesed_dictionary = process_quanta_archive(base_url,page_number)
@@ -518,7 +540,7 @@ def process_quanta_archive_datafram(base_url: str, page_number: int) -> None:
 	arxivDF.to_csv(arix_output_filename,index=False)
 	quantaDF.to_csv(quanta_output_filename,index=False)
 
-page_number = 183
+page_number = 203
 base_url = 'https://www.quantamagazine.org/archive/'
 test = process_quanta_archive_datafram(base_url,page_number)
 
@@ -565,8 +587,10 @@ test = process_quanta_archive_datafram(base_url,page_number)
 # arxivDF.to_csv("arxiv-10pages.csv",index=False)
 # quantaDF.to_csv("quanta-10pages.csv",index=False)
 
-
-
+# url = 'https://www.quantamagazine.org/a-good-memory-or-a-bad-one-one-brain-molecule-decides-20220907/'
+# webpage_soup = get_webpage(url)
+# print(webpage_soup.find_all("meta", {"property": "article:published_time"})[0])
+# print(get_pub_date_quanta_article(webpage_soup))
 # 25 pages of quanta archvie
 # 93 articles with arixv link
 # 225 total articles
